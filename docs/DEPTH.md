@@ -14,6 +14,7 @@
 | M5 浓度复算 | 运行浓度复算并核对证据 | `POST /api/5` | `app/modules/m5_concentration/rules.py` | `tests/test_concentration.py` |
 | M6 质控判定 | 运行质控判定并核对证据 | `POST /api/6` | `app/modules/m6_quality/rules.py` | `tests/test_quality.py` |
 | M7 结果复核 | 运行结果复核并核对证据 | `POST /api/7` | `app/modules/m7_review/rules.py` | `tests/test_review.py` |
+| M8 定量下限 | 确认文件建档、切换在用版本、按档案判定常规批次 | `POST /api/8/confirm`、`/api/8/activate`、`/api/8/apply` | `app/modules/m8_lloq/rules.py`、`service.py` | `tests/test_lloq.py` |
 
 ## 陷阱登记
 
@@ -27,6 +28,10 @@
 | TRAP-14 | 业务键冲突 | 静默采信错误值 | 保留首条并隔离冲突 | `app/modules/m1_intake/rules.py` | `tests/test_intake.py::test_intake_conflicting_key` |
 | TRAP-15 | 单位混合 | 静默采信错误值 | 浓度单位归一 | `app/modules/m2_internal/rules.py` | `tests/test_internal.py::test_internal_units` |
 | TRAP-19 | 多个质控标记 | 静默采信错误值 | 显式优先级 | `app/modules/m6_quality/rules.py` | `tests/test_quality.py::test_quality_priority` |
+| TRAP-20 | 重试同一确认文件 | 重复建档、版本泛滥 | 内容寻址INSERT OR IGNORE | `app/store.py::lloq_put_dossier` | `tests/test_lloq.py::test_confirm_retry_same_file_creates_no_new_dossier` |
+| TRAP-21 | 切换中途失败或档案被改 | 半切换状态、下限不可信 | 校验前置+单事务，失败保留上一版 | `app/modules/m8_lloq/service.py`、`app/store.py::lloq_switch` | `tests/test_lloq.py::test_failed_switch_keeps_previous_version` |
+| TRAP-22 | 覆盖原始加标/空白 | 原始证据不可恢复 | 原始记录只插不改、内容寻址 | `app/store.py::lloq_put_raw` | `tests/test_lloq.py::test_raw_records_never_overwritten` |
+| TRAP-23 | 低浓度噪声误当检出 | 证据不足区间直接报出 | 暂扣区+t因子放大，补足7次再确认 | `app/modules/m8_lloq/rules.py` | `tests/test_lloq.py::test_classify_boundaries` |
 
 ## 对账规则
 

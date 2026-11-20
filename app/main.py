@@ -11,8 +11,8 @@ import importlib
 app=FastAPI(title='质谱空白扣除与检出限复算')
 app.mount("/static",StaticFiles(directory=Path(__file__).parent/"static"),name="static")
 templates=Jinja2Templates(directory=Path(__file__).parent/"templates")
-MODULES=['仪器接收', '内标归一', '标曲拟合', '空白扣除', '浓度复算', '质控判定', '结果复核']
-for n,slug in enumerate(['intake', 'internal', 'curve', 'blank', 'concentration', 'quality', 'review'],1):
+MODULES=['仪器接收', '内标归一', '标曲拟合', '空白扣除', '浓度复算', '质控判定', '结果复核', '定量下限']
+for n,slug in enumerate(['intake', 'internal', 'curve', 'blank', 'concentration', 'quality', 'review', 'lloq'],1):
     app.include_router(importlib.import_module(f"app.modules.m{n}_{slug}.handler").router)
 @app.exception_handler(BusinessError)
 async def domain_error(request,exc):
@@ -23,9 +23,12 @@ def health(): return {"status":"ok"}
 def home(request:Request): return page(request,1)
 @app.get("/module/{module}",response_class=HTMLResponse)
 def page(request:Request,module:int):
-    if module not in range(1,8): raise BusinessError("MODULE","模块不存在",404)
+    if module not in range(1,9): raise BusinessError("MODULE","模块不存在",404)
     ident=request.query_params.get("run_id")
     item=store.get(ident) if ident else store.save(sample_text(),run(sample_text()))
+    if module==8:
+        from app.modules.m8_lloq import service as lloq_service
+        return templates.TemplateResponse(request=request,name="lloq.html",context={"title":'质谱空白扣除与检出限复算',"modules":MODULES,"active":module,"run":item,"lloq":lloq_service.overview()})
     return templates.TemplateResponse(request=request,name="workbench.html",context={"title":'质谱空白扣除与检出限复算',"modules":MODULES,"active":module,"run":item,"report":item["result"]["reports"][module-1]})
 @app.post("/api/run")
 def calculate(payload:object=Body(default=None)):

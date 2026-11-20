@@ -1,0 +1,15 @@
+kind,analyte,nominal,value,unit
+blank,Pb,0,0.010,ug/L
+blank,Pb,0,0.012,ug/L
+blank,Pb,0,0.009,ug/L
+blank,Pb,0,0.011,ug/L
+blank,Pb,0,0.010,ug/L
+blank,Pb,0,0.013,ug/L
+blank,Pb,0,0.008,ug/L
+spike,Pb,0.1,0.097,ug/L
+spike,Pb,0.1,0.103,ug/L
+spike,Pb,0.1,0.099,ug/L
+spike,Pb,0.1,0.101,ug/L
+spike,Pb,0.1,0.098,ug/L
+spike,Pb,0.1,0.104,ug/L
+spike,Pb,0.1,0.096,ug/L

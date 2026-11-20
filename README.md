@@ -25,6 +25,13 @@ docker compose config --quiet
 - M5 浓度复算：`/module/5`，独立计算 `POST /api/5`。
 - M6 质控判定：`/module/6`，独立计算 `POST /api/6`。
 - M7 结果复核：`/module/7`，独立计算 `POST /api/7`。
+- M8 定量下限：`/module/8`，档案管理 `POST /api/8/confirm`、`/api/8/activate`、`/api/8/apply`。
+
+## 定量下限档案
+
+方法确认文件（空白+低浓度加标，样例 `sample_data/confirmation_pb_3rep.csv`）经 `POST /api/8/confirm` 生成定量下限档案：内容寻址、只插不改，同一确认文件重试不新增档案。档案给出检出限、暂扣上限、定量下限与依据；平行数不足7次为“暂定”，低浓度证据不足区间的样品判“暂扣”，避免把噪声当检出。
+
+`POST /api/8/activate` 切换某分析项的在用档案：校验全部前置（档案完整、阈值有序、原始记录在位），切换记录与指针在单事务内提交，失败保留上一版。`POST /api/8/apply` 让常规批次按同一版在用档案给出未检出、暂扣、检出、定量；同批次同档案重试复用同一结果。切换记录载明报告范围的扩大/收窄区间、依据与受影响样品，`/module/8` 与 `GET /api/8/report?dossier_id=` 可复核。原始加标与空白记录只有插入路径，覆盖写在结构上不存在。
 
 ## 输入与输出
 
